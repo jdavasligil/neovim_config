@@ -1,11 +1,38 @@
 local lsp = require("lsp-zero")
+local nvim_lsp = require("lspconfig")
 
 lsp.preset("recommended")
 
 lsp.ensure_installed({
+  'tsserver',
+  'svelte',
+  'asm_lsp',
   'denols',
   'rust_analyzer',
   'lua_ls',
+  'gopls',
+})
+
+-- on every lsp attach it does a check for deno app if so closes tsserver
+-- this allows tsserver to start on single .ts files
+
+lsp.on_attach(function(client)
+    if nvim_lsp.util.root_pattern("deno.json", "import_map.json")(vim.fn.getcwd()) then
+        if client.name == "tsserver" then
+            client.stop()
+            return
+        end
+    end
+end)
+
+vim.g.markdown_fenced_languages = {
+    "ts=typescript"
+}
+
+-- Just need to set the directory for denols to startup in
+-- if it detects either files thats what it will do
+lsp.configure('denols', {
+    root_dir = nvim_lsp.util.root_pattern("deno.json", "import_map.json"),
 })
 
 -- Fix Undefined global 'vim'
