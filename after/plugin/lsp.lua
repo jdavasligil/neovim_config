@@ -3,6 +3,7 @@ local nvim_lsp = require("lspconfig")
 
 lsp.preset("recommended")
 
+-- List: https://github.com/williamboman/mason-lspconfig.nvim#available-lsp-servers
 lsp.ensure_installed({
   'tsserver',
   'svelte',
@@ -11,6 +12,7 @@ lsp.ensure_installed({
   'rust_analyzer',
   'lua_ls',
   'gopls',
+  'zls',
 })
 
 -- on every lsp attach it does a check for deno app if so closes tsserver
