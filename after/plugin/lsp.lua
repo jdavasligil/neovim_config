@@ -14,6 +14,7 @@ lsp.ensure_installed({
   'gopls',
   'zls',
   'ocamllsp',
+  'clangd',
 })
 
 -- on every lsp attach it does a check for deno app if so closes tsserver
