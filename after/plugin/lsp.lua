@@ -5,7 +5,7 @@ lsp.preset("recommended")
 
 -- List: https://github.com/williamboman/mason-lspconfig.nvim#available-lsp-servers
 lsp.ensure_installed({
-  'tsserver',
+  'ts_ls',
   'svelte',
   'asm_lsp',
   'denols',
@@ -13,8 +13,10 @@ lsp.ensure_installed({
   'lua_ls',
   'gopls',
   'zls',
-  'ocamllsp',
+--  'ocamllsp',
   'clangd',
+  'sqlls',
+  'marksman',
 })
 
 -- on every lsp attach it does a check for deno app if so closes tsserver
@@ -28,6 +30,8 @@ lsp.on_attach(function(client)
         end
     end
 end)
+
+vim.g.c_syntax_for_h = 1
 
 vim.g.markdown_fenced_languages = {
     "ts=typescript"
@@ -49,7 +53,6 @@ lsp.configure('lua_ls', {
         }
     }
 })
-
 
 local cmp = require('cmp')
 local cmp_select = {behavior = cmp.SelectBehavior.Select}
