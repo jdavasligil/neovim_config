@@ -1,0 +1,776 @@
+SCRIPT  /usr/share/nvim/runtime/syntax/lua.vim
+Sourced 1 time
+Total time:   0.000745
+ Self time:   0.000741
+
+count  total (s)   self (s)
+                            " Vim syntax file
+                            " Language:     Lua 4.0, Lua 5.0, Lua 5.1, Lua 5.2 and Lua 5.3
+                            " Maintainer:   Marcus Aurelius Farias <masserahguard-lua 'at' yahoo com>
+                            " First Author: Carlos Augusto Teixeira Mendes <cmendes 'at' inf puc-rio br>
+                            " Last Change:  2022 Sep 07
+                            " Options:      lua_version = 4 or 5
+                            "               lua_subversion = 0 (for 4.0 or 5.0)
+                            "                               or 1, 2, 3 (for 5.1, 5.2 or 5.3)
+                            "               the default is 5.3
+                            
+                            " quit when a syntax file was already loaded
+    1              0.000005 if exists("b:current_syntax")
+                              finish
+    1              0.000001 endif
+                            
+    1              0.000003 let s:cpo_save = &cpo
+    1   0.000008   0.000006 set cpo&vim
+                            
+    1              0.000002 if !exists("lua_version")
+                              " Default is lua 5.3
+                              let lua_version = 5
+                              let lua_subversion = 3
+    1              0.000002 elseif !exists("lua_subversion")
+                              " lua_version exists, but lua_subversion doesn't. In this case set it to 0
+                              let lua_subversion = 0
+    1              0.000000 endif
+                            
+    1              0.000001 syn case match
+                            
+                            " syncing method
+    1              0.000002 syn sync minlines=1000
+                            
+    1              0.000001 if lua_version >= 5
+    1              0.000004   syn keyword luaMetaMethod __add __sub __mul __div __pow __unm __concat
+    1              0.000001   syn keyword luaMetaMethod __eq __lt __le
+    1              0.000001   syn keyword luaMetaMethod __index __newindex __call
+    1              0.000002   syn keyword luaMetaMethod __metatable __mode __gc __tostring
+    1              0.000000 endif
+                            
+    1              0.000002 if lua_version > 5 || (lua_version == 5 && lua_subversion >= 1)
+    1              0.000001   syn keyword luaMetaMethod __mod __len
+    1              0.000000 endif
+                            
+    1              0.000002 if lua_version > 5 || (lua_version == 5 && lua_subversion >= 2)
+    1              0.000001   syn keyword luaMetaMethod __pairs
+    1              0.000000 endif
+                            
+    1              0.000002 if lua_version > 5 || (lua_version == 5 && lua_subversion >= 3)
+    1              0.000001   syn keyword luaMetaMethod __idiv __name
+    1              0.000001   syn keyword luaMetaMethod __band __bor __bxor __bnot __shl __shr
+    1              0.000000 endif
+                            
+    1              0.000002 if lua_version > 5 || (lua_version == 5 && lua_subversion >= 4)
+                              syn keyword luaMetaMethod __close
+    1              0.000000 endif
+                            
+                            " catch errors caused by wrong parenthesis and wrong curly brackets or
+                            " keywords placed outside their respective blocks
+                            
+    1              0.000007 syn region luaParen transparent start='(' end=')' contains=TOP,luaParenError
+    1              0.000002 syn match  luaParenError ")"
+    1              0.000002 syn match  luaError "}"
+    1              0.000005 syn match  luaError "\<\%(end\|else\|elseif\|then\|until\|in\)\>"
+                            
+                            " Function declaration
+    1              0.000006 syn region luaFunctionBlock transparent matchgroup=luaFunction start="\<function\>" end="\<end\>" contains=TOP
+                            
+                            " else
+    1              0.000003 syn keyword luaCondElse matchgroup=luaCond contained containedin=luaCondEnd else
+                            
+                            " then ... end
+    1              0.000004 syn region luaCondEnd contained transparent matchgroup=luaCond start="\<then\>" end="\<end\>" contains=TOP
+                            
+                            " elseif ... then
+    1              0.000007 syn region luaCondElseif contained containedin=luaCondEnd transparent matchgroup=luaCond start="\<elseif\>" end="\<then\>" contains=TOP
+                            
+                            " if ... then
+    1              0.000005 syn region luaCondStart transparent matchgroup=luaCond start="\<if\>" end="\<then\>"me=e-4 contains=TOP nextgroup=luaCondEnd skipwhite skipempty
+                            
+                            " do ... end
+    1              0.000004 syn region luaBlock transparent matchgroup=luaStatement start="\<do\>" end="\<end\>" contains=TOP
+                            " repeat ... until
+    1              0.000006 syn region luaRepeatBlock transparent matchgroup=luaRepeat start="\<repeat\>" end="\<until\>" contains=TOP
+                            
+                            " while ... do
+    1              0.000006 syn region luaWhile transparent matchgroup=luaRepeat start="\<while\>" end="\<do\>"me=e-2 contains=TOP nextgroup=luaBlock skipwhite skipempty
+                            
+                            " for ... do and for ... in ... do
+    1              0.000005 syn region luaFor transparent matchgroup=luaRepeat start="\<for\>" end="\<do\>"me=e-2 contains=TOP nextgroup=luaBlock skipwhite skipempty
+                            
+    1              0.000002 syn keyword luaFor contained containedin=luaFor in
+                            
+                            " other keywords
+    1              0.000002 syn keyword luaStatement return local break
+    1              0.000002 if lua_version > 5 || (lua_version == 5 && lua_subversion >= 2)
+    1              0.000001   syn keyword luaStatement goto
+    1              0.000003   syn match luaLabel "::\I\i*::"
+    1              0.000000 endif
+                            
+                            " operators
+    1              0.000002 syn keyword luaOperator and or not
+                            
+    1              0.000002 if (lua_version == 5 && lua_subversion >= 3) || lua_version > 5
+    1              0.000005   syn match luaSymbolOperator "[#<>=~^&|*/%+-]\|\.\{2,3}"
+                            elseif lua_version == 5 && (lua_subversion == 1 || lua_subversion == 2)
+                              syn match luaSymbolOperator "[#<>=~^*/%+-]\|\.\{2,3}"
+                            else
+                              syn match luaSymbolOperator "[<>=~^*/+-]\|\.\{2,3}"
+    1              0.000000 endif
+                            
+                            " comments
+    1              0.000002 syn keyword luaTodo            contained TODO FIXME XXX
+    1              0.000004 syn match   luaComment         "--.*$" contains=luaTodo,@Spell
+    1              0.000003 if lua_version == 5 && lua_subversion == 0
+                              syn region luaComment        matchgroup=luaCommentDelimiter start="--\[\[" end="\]\]" contains=luaTodo,luaInnerComment,@Spell
+                              syn region luaInnerComment   contained transparent start="\[\[" end="\]\]"
+    1              0.000002 elseif lua_version > 5 || (lua_version == 5 && lua_subversion >= 1)
+                              " Comments in Lua 5.1: --[[ ... ]], [=[ ... ]=], [===[ ... ]===], etc.
+    1              0.000006   syn region luaComment        matchgroup=luaCommentDelimiter start="--\[\z(=*\)\[" end="\]\z1\]" contains=luaTodo,@Spell
+    1              0.000000 endif
+                            
+                            " first line may start with #!
+    1              0.000003 syn match luaComment "\%^#!.*"
+                            
+    1              0.000002 syn keyword luaConstant nil
+    1              0.000001 if lua_version > 4
+    1              0.000002   syn keyword luaConstant true false
+    1              0.000000 endif
+                            
+                            " strings
+    1              0.000005 syn match  luaSpecial contained #\\[\\abfnrtv'"[\]]\|\\[[:digit:]]\{,3}#
+    1              0.000001 if lua_version == 5
+    1              0.000001   if lua_subversion == 0
+                                syn region luaString2 matchgroup=luaStringDelimiter start=+\[\[+ end=+\]\]+ contains=luaString2,@Spell
+    1              0.000001   else
+    1              0.000001     if lua_subversion >= 2
+    1              0.000003       syn match  luaSpecial contained #\\z\|\\x[[:xdigit:]]\{2}#
+    1              0.000000     endif
+    1              0.000001     if lua_subversion >= 3
+    1              0.000003       syn match  luaSpecial contained #\\u{[[:xdigit:]]\+}#
+    1              0.000001     endif
+    1              0.000004     syn region luaString2 matchgroup=luaStringDelimiter start="\[\z(=*\)\[" end="\]\z1\]" contains=@Spell
+    1              0.000000   endif
+    1              0.000000 endif
+    1              0.000006 syn region luaString matchgroup=luaStringDelimiter start=+'+ end=+'+ skip=+\\\\\|\\'+ contains=luaSpecial,@Spell
+    1              0.000005 syn region luaString matchgroup=luaStringDelimiter start=+"+ end=+"+ skip=+\\\\\|\\"+ contains=luaSpecial,@Spell
+                            
+                            " integer number
+    1              0.000003 syn match luaNumber "\<\d\+\>"
+                            " floating point number, with dot, optional exponent
+    1              0.000004 syn match luaNumber  "\<\d\+\.\d*\%([eE][-+]\=\d\+\)\="
+                            " floating point number, starting with a dot, optional exponent
+    1              0.000005 syn match luaNumber  "\.\d\+\%([eE][-+]\=\d\+\)\=\>"
+                            " floating point number, without dot, with exponent
+    1              0.000003 syn match luaNumber  "\<\d\+[eE][-+]\=\d\+\>"
+                            
+                            " hex numbers
+    1              0.000001 if lua_version >= 5
+    1              0.000001   if lua_subversion == 1
+                                syn match luaNumber "\<0[xX]\x\+\>"
+    1              0.000001   elseif lua_subversion >= 2
+    1              0.000004     syn match luaNumber "\<0[xX][[:xdigit:].]\+\%([pP][-+]\=\d\+\)\=\>"
+    1              0.000000   endif
+    1              0.000000 endif
+                            
+                            " tables
+    1              0.000004 syn region luaTableBlock transparent matchgroup=luaTable start="{" end="}" contains=TOP,luaStatement
+                            
+                            " methods
+    1              0.000003 syntax match luaFunc ":\@<=\k\+"
+                            
+                            " built-in functions
+    1              0.000002 syn keyword luaFunc assert collectgarbage dofile error next
+    1              0.000002 syn keyword luaFunc print rawget rawset self tonumber tostring type _VERSION
+                            
+    1              0.000001 if lua_version == 4
+                              syn keyword luaFunc _ALERT _ERRORMESSAGE gcinfo
+                              syn keyword luaFunc call copytagmethods dostring
+                              syn keyword luaFunc foreach foreachi getglobal getn
+                              syn keyword luaFunc gettagmethod globals newtag
+                              syn keyword luaFunc setglobal settag settagmethod sort
+                              syn keyword luaFunc tag tinsert tremove
+                              syn keyword luaFunc _INPUT _OUTPUT _STDIN _STDOUT _STDERR
+                              syn keyword luaFunc openfile closefile flush seek
+                              syn keyword luaFunc setlocale execute remove rename tmpname
+                              syn keyword luaFunc getenv date clock exit
+                              syn keyword luaFunc readfrom writeto appendto read write
+                              syn keyword luaFunc PI abs sin cos tan asin
+                              syn keyword luaFunc acos atan atan2 ceil floor
+                              syn keyword luaFunc mod frexp ldexp sqrt min max log
+                              syn keyword luaFunc log10 exp deg rad random
+                              syn keyword luaFunc randomseed strlen strsub strlower strupper
+                              syn keyword luaFunc strchar strrep ascii strbyte
+                              syn keyword luaFunc format strfind gsub
+                              syn keyword luaFunc getinfo getlocal setlocal setcallhook setlinehook
+    1              0.000001 elseif lua_version == 5
+    1              0.000001   syn keyword luaFunc getmetatable setmetatable
+    1              0.000001   syn keyword luaFunc ipairs pairs
+    1              0.000001   syn keyword luaFunc pcall xpcall
+    1              0.000001   syn keyword luaFunc _G loadfile rawequal require
+    1              0.000001   if lua_subversion == 0
+                                syn keyword luaFunc getfenv setfenv
+                                syn keyword luaFunc loadstring unpack
+                                syn keyword luaFunc gcinfo loadlib LUA_PATH _LOADED _REQUIREDNAME
+    1              0.000001   else
+    1              0.000001     syn keyword luaFunc load select
+    1              0.000004     syn match   luaFunc /\<package\.cpath\>/
+    1              0.000003     syn match   luaFunc /\<package\.loaded\>/
+    1              0.000003     syn match   luaFunc /\<package\.loadlib\>/
+    1              0.000002     syn match   luaFunc /\<package\.path\>/
+    1              0.000003     syn match   luaFunc /\<package\.preload\>/
+    1              0.000001     if lua_subversion == 1
+                                  syn keyword luaFunc getfenv setfenv
+                                  syn keyword luaFunc loadstring module unpack
+                                  syn match   luaFunc /\<package\.loaders\>/
+                                  syn match   luaFunc /\<package\.seeall\>/
+    1              0.000001     elseif lua_subversion >= 2
+    1              0.000002       syn keyword luaFunc _ENV rawlen
+    1              0.000003       syn match   luaFunc /\<package\.config\>/
+    1              0.000002       syn match   luaFunc /\<package\.preload\>/
+    1              0.000004       syn match   luaFunc /\<package\.searchers\>/
+    1              0.000003       syn match   luaFunc /\<package\.searchpath\>/
+    1              0.000000     endif
+                            
+    1              0.000001     if lua_subversion >= 3
+    1              0.000003       syn match luaFunc /\<coroutine\.isyieldable\>/
+    1              0.000000     endif
+    1              0.000001     if lua_subversion >= 4
+                                  syn keyword luaFunc warn
+                                  syn match luaFunc /\<coroutine\.close\>/
+    1              0.000001     endif
+    1              0.000003     syn match luaFunc /\<coroutine\.running\>/
+    1              0.000000   endif
+    1              0.000003   syn match   luaFunc /\<coroutine\.create\>/
+    1              0.000003   syn match   luaFunc /\<coroutine\.resume\>/
+    1              0.000002   syn match   luaFunc /\<coroutine\.status\>/
+    1              0.000002   syn match   luaFunc /\<coroutine\.wrap\>/
+    1              0.000002   syn match   luaFunc /\<coroutine\.yield\>/
+                            
+    1              0.000002   syn match   luaFunc /\<string\.byte\>/
+    1              0.000002   syn match   luaFunc /\<string\.char\>/
+    1              0.000003   syn match   luaFunc /\<string\.dump\>/
+    1              0.000003   syn match   luaFunc /\<string\.find\>/
+    1              0.000003   syn match   luaFunc /\<string\.format\>/
+    1              0.000002   syn match   luaFunc /\<string\.gsub\>/
+    1              0.000002   syn match   luaFunc /\<string\.len\>/
+    1              0.000002   syn match   luaFunc /\<string\.lower\>/
+    1              0.000002   syn match   luaFunc /\<string\.rep\>/
+    1              0.000002   syn match   luaFunc /\<string\.sub\>/
+    1              0.000002   syn match   luaFunc /\<string\.upper\>/
+    1              0.000001   if lua_subversion == 0
+                                syn match luaFunc /\<string\.gfind\>/
+    1              0.000000   else
+    1              0.000002     syn match luaFunc /\<string\.gmatch\>/
+    1              0.000002     syn match luaFunc /\<string\.match\>/
+    1              0.000003     syn match luaFunc /\<string\.reverse\>/
+    1              0.000000   endif
+    1              0.000001   if lua_subversion >= 3
+    1              0.000003     syn match luaFunc /\<string\.pack\>/
+    1              0.000003     syn match luaFunc /\<string\.packsize\>/
+    1              0.000003     syn match luaFunc /\<string\.unpack\>/
+    1              0.000002     syn match luaFunc /\<utf8\.char\>/
+    1              0.000003     syn match luaFunc /\<utf8\.charpattern\>/
+    1              0.000002     syn match luaFunc /\<utf8\.codes\>/
+    1              0.000002     syn match luaFunc /\<utf8\.codepoint\>/
+    1              0.000002     syn match luaFunc /\<utf8\.len\>/
+    1              0.000002     syn match luaFunc /\<utf8\.offset\>/
+    1              0.000000   endif
+                            
+    1              0.000001   if lua_subversion == 0
+                                syn match luaFunc /\<table\.getn\>/
+                                syn match luaFunc /\<table\.setn\>/
+                                syn match luaFunc /\<table\.foreach\>/
+                                syn match luaFunc /\<table\.foreachi\>/
+    1              0.000001   elseif lua_subversion == 1
+                                syn match luaFunc /\<table\.maxn\>/
+    1              0.000001   elseif lua_subversion >= 2
+    1              0.000002     syn match luaFunc /\<table\.pack\>/
+    1              0.000002     syn match luaFunc /\<table\.unpack\>/
+    1              0.000001     if lua_subversion >= 3
+    1              0.000002       syn match luaFunc /\<table\.move\>/
+    1              0.000000     endif
+    1              0.000000   endif
+    1              0.000002   syn match   luaFunc /\<table\.concat\>/
+    1              0.000002   syn match   luaFunc /\<table\.insert\>/
+    1              0.000002   syn match   luaFunc /\<table\.sort\>/
+    1              0.000002   syn match   luaFunc /\<table\.remove\>/
+                            
+    1              0.000001   if lua_subversion == 2
+                                syn match   luaFunc /\<bit32\.arshift\>/
+                                syn match   luaFunc /\<bit32\.band\>/
+                                syn match   luaFunc /\<bit32\.bnot\>/
+                                syn match   luaFunc /\<bit32\.bor\>/
+                                syn match   luaFunc /\<bit32\.btest\>/
+                                syn match   luaFunc /\<bit32\.bxor\>/
+                                syn match   luaFunc /\<bit32\.extract\>/
+                                syn match   luaFunc /\<bit32\.lrotate\>/
+                                syn match   luaFunc /\<bit32\.lshift\>/
+                                syn match   luaFunc /\<bit32\.replace\>/
+                                syn match   luaFunc /\<bit32\.rrotate\>/
+                                syn match   luaFunc /\<bit32\.rshift\>/
+    1              0.000000   endif
+                            
+    1              0.000013   syn match   luaFunc /\<math\.abs\>/
+    1              0.000002   syn match   luaFunc /\<math\.acos\>/
+    1              0.000002   syn match   luaFunc /\<math\.asin\>/
+    1              0.000002   syn match   luaFunc /\<math\.atan\>/
+    1              0.000001   if lua_subversion < 3
+                                syn match   luaFunc /\<math\.atan2\>/
+    1              0.000000   endif
+    1              0.000003   syn match   luaFunc /\<math\.ceil\>/
+    1              0.000003   syn match   luaFunc /\<math\.sin\>/
+    1              0.000002   syn match   luaFunc /\<math\.cos\>/
+    1              0.000002   syn match   luaFunc /\<math\.tan\>/
+    1              0.000002   syn match   luaFunc /\<math\.deg\>/
+    1              0.000002   syn match   luaFunc /\<math\.exp\>/
+    1              0.000002   syn match   luaFunc /\<math\.floor\>/
+    1              0.000002   syn match   luaFunc /\<math\.log\>/
+    1              0.000002   syn match   luaFunc /\<math\.max\>/
+    1              0.000002   syn match   luaFunc /\<math\.min\>/
+    1              0.000001   if lua_subversion == 0
+                                syn match luaFunc /\<math\.mod\>/
+                                syn match luaFunc /\<math\.log10\>/
+    1              0.000001   elseif lua_subversion == 1
+                                syn match luaFunc /\<math\.log10\>/
+    1              0.000000   endif
+    1              0.000001   if lua_subversion >= 1
+    1              0.000002     syn match luaFunc /\<math\.huge\>/
+    1              0.000002     syn match luaFunc /\<math\.fmod\>/
+    1              0.000002     syn match luaFunc /\<math\.modf\>/
+    1              0.000001     if lua_subversion == 1 || lua_subversion == 2
+                                  syn match luaFunc /\<math\.cosh\>/
+                                  syn match luaFunc /\<math\.sinh\>/
+                                  syn match luaFunc /\<math\.tanh\>/
+    1              0.000000     endif
+    1              0.000000   endif
+    1              0.000002   syn match   luaFunc /\<math\.rad\>/
+    1              0.000002   syn match   luaFunc /\<math\.sqrt\>/
+    1              0.000001   if lua_subversion < 3
+                                syn match   luaFunc /\<math\.pow\>/
+                                syn match   luaFunc /\<math\.frexp\>/
+                                syn match   luaFunc /\<math\.ldexp\>/
+    1              0.000000   else
+    1              0.000003     syn match   luaFunc /\<math\.maxinteger\>/
+    1              0.000003     syn match   luaFunc /\<math\.mininteger\>/
+    1              0.000002     syn match   luaFunc /\<math\.tointeger\>/
+    1              0.000002     syn match   luaFunc /\<math\.type\>/
+    1              0.000002     syn match   luaFunc /\<math\.ult\>/
+    1              0.000000   endif
+    1              0.000002   syn match   luaFunc /\<math\.random\>/
+    1              0.000003   syn match   luaFunc /\<math\.randomseed\>/
+    1              0.000002   syn match   luaFunc /\<math\.pi\>/
+                            
+    1              0.000002   syn match   luaFunc /\<io\.close\>/
+    1              0.000002   syn match   luaFunc /\<io\.flush\>/
+    1              0.000002   syn match   luaFunc /\<io\.input\>/
+    1              0.000002   syn match   luaFunc /\<io\.lines\>/
+    1              0.000002   syn match   luaFunc /\<io\.open\>/
+    1              0.000002   syn match   luaFunc /\<io\.output\>/
+    1              0.000002   syn match   luaFunc /\<io\.popen\>/
+    1              0.000002   syn match   luaFunc /\<io\.read\>/
+    1              0.000002   syn match   luaFunc /\<io\.stderr\>/
+    1              0.000002   syn match   luaFunc /\<io\.stdin\>/
+    1              0.000002   syn match   luaFunc /\<io\.stdout\>/
+    1              0.000002   syn match   luaFunc /\<io\.tmpfile\>/
+    1              0.000002   syn match   luaFunc /\<io\.type\>/
+    1              0.000002   syn match   luaFunc /\<io\.write\>/
+                            
+    1              0.000002   syn match   luaFunc /\<os\.clock\>/
+    1              0.000002   syn match   luaFunc /\<os\.date\>/
+    1              0.000002   syn match   luaFunc /\<os\.difftime\>/
+    1              0.000002   syn match   luaFunc /\<os\.execute\>/
+    1              0.000002   syn match   luaFunc /\<os\.exit\>/
+    1              0.000002   syn match   luaFunc /\<os\.getenv\>/
+    1              0.000002   syn match   luaFunc /\<os\.remove\>/
+    1              0.000002   syn match   luaFunc /\<os\.rename\>/
+    1              0.000002   syn match   luaFunc /\<os\.setlocale\>/
+    1              0.000002   syn match   luaFunc /\<os\.time\>/
+    1              0.000002   syn match   luaFunc /\<os\.tmpname\>/
+                            
+    1              0.000003   syn match   luaFunc /\<debug\.debug\>/
+    1              0.000002   syn match   luaFunc /\<debug\.gethook\>/
+    1              0.000002   syn match   luaFunc /\<debug\.getinfo\>/
+    1              0.000003   syn match   luaFunc /\<debug\.getlocal\>/
+    1              0.000003   syn match   luaFunc /\<debug\.getupvalue\>/
+    1              0.000002   syn match   luaFunc /\<debug\.setlocal\>/
+    1              0.000002   syn match   luaFunc /\<debug\.setupvalue\>/
+    1              0.000002   syn match   luaFunc /\<debug\.sethook\>/
+    1              0.000002   syn match   luaFunc /\<debug\.traceback\>/
+    1              0.000001   if lua_subversion == 1
+                                syn match luaFunc /\<debug\.getfenv\>/
+                                syn match luaFunc /\<debug\.setfenv\>/
+    1              0.000000   endif
+    1              0.000001   if lua_subversion >= 1
+    1              0.000003     syn match luaFunc /\<debug\.getmetatable\>/
+    1              0.000003     syn match luaFunc /\<debug\.setmetatable\>/
+    1              0.000003     syn match luaFunc /\<debug\.getregistry\>/
+    1              0.000001     if lua_subversion >= 2
+    1              0.000003       syn match luaFunc /\<debug\.getuservalue\>/
+    1              0.000003       syn match luaFunc /\<debug\.setuservalue\>/
+    1              0.000002       syn match luaFunc /\<debug\.upvalueid\>/
+    1              0.000004       syn match luaFunc /\<debug\.upvaluejoin\>/
+    1              0.000000     endif
+    1              0.000001     if lua_subversion >= 4
+                                  syn match luaFunc /\<debug.setcstacklimit\>/
+    1              0.000000     endif
+    1              0.000000   endif
+    1              0.000000 endif
+                            
+                            " Define the default highlighting.
+                            " Only when an item doesn't have highlighting yet
+                            
+    1              0.000002 hi def link luaStatement        Statement
+    1              0.000001 hi def link luaRepeat           Repeat
+    1              0.000001 hi def link luaFor              Repeat
+    1              0.000001 hi def link luaString           String
+    1              0.000001 hi def link luaString2          String
+    1              0.000001 hi def link luaStringDelimiter  luaString
+    1              0.000001 hi def link luaNumber           Number
+    1              0.000001 hi def link luaOperator         Operator
+    1              0.000001 hi def link luaSymbolOperator   luaOperator
+    1              0.000001 hi def link luaConstant         Constant
+    1              0.000001 hi def link luaCond             Conditional
+    1              0.000001 hi def link luaCondElse         Conditional
+    1              0.000001 hi def link luaFunction         Function
+    1              0.000001 hi def link luaMetaMethod       Function
+    1              0.000001 hi def link luaComment          Comment
+    1              0.000001 hi def link luaCommentDelimiter luaComment
+    1              0.000001 hi def link luaTodo             Todo
+    1              0.000001 hi def link luaTable            Structure
+    1              0.000001 hi def link luaError            Error
+    1              0.000001 hi def link luaParenError       Error
+    1              0.000001 hi def link luaSpecial          SpecialChar
+    1              0.000001 hi def link luaFunc             Identifier
+    1              0.000001 hi def link luaLabel            Label
+                            
+                            
+    1              0.000002 let b:current_syntax = "lua"
+                            
+    1   0.000008   0.000006 let &cpo = s:cpo_save
+    1              0.000002 unlet s:cpo_save
+                            " vim: et ts=8 sw=2
+
+SCRIPT  /home/ada/.local/share/nvim/lazy/nvim-treesitter/autoload/nvim_treesitter.vim
+Sourced 1 time
+Total time:   0.000037
+ Self time:   0.000037
+
+count  total (s)   self (s)
+    1              0.000009 function! nvim_treesitter#statusline(...) abort
+                              return luaeval("require'nvim-treesitter.statusline'.statusline(_A)", get(a:, 1, {}))
+                            endfunction
+                            
+    1              0.000001 function! nvim_treesitter#foldexpr() abort
+                            	return luaeval(printf('require"nvim-treesitter.fold".get_fold_indic(%d)', v:lnum))
+                            endfunction
+                            
+    1              0.000002 function! nvim_treesitter#installable_parsers(arglead, cmdline, cursorpos) abort
+                              return join(luaeval("require'nvim-treesitter.parsers'.available_parsers()") + ['all'], "\n")
+                            endfunction
+                            
+    1              0.000001 function! nvim_treesitter#installed_parsers(arglead, cmdline, cursorpos) abort
+                              return join(luaeval("require'nvim-treesitter.info'.installed_parsers()") + ['all'], "\n")
+                            endfunction
+                            
+    1              0.000002 function! nvim_treesitter#available_modules(arglead, cmdline, cursorpos) abort
+                              return join(luaeval("require'nvim-treesitter.configs'.available_modules()"), "\n")
+                            endfunction
+                            
+    1              0.000001 function! nvim_treesitter#available_query_groups(arglead, cmdline, cursorpos) abort
+                              return join(luaeval("require'nvim-treesitter.query'.available_query_groups()"), "\n")
+                            endfunction
+                            
+    1              0.000001 function! nvim_treesitter#indent() abort
+                            	return luaeval(printf('require"nvim-treesitter.indent".get_indent(%d)', v:lnum))
+                            endfunction
+
+FUNCTION  <SNR>19_Highlight_Matching_Pair()
+    Defined: /usr/share/nvim/runtime/plugin/matchparen.vim:44
+Called 27 times
+Total time:   0.002230
+ Self time:   0.001899
+
+count  total (s)   self (s)
+   27              0.000146   if !exists("w:matchparen_ids")
+                                let w:matchparen_ids = []
+   27              0.000025   endif
+                              " Remove any previous match.
+   27   0.000510   0.000179   call s:Remove_Matches()
+                            
+                              " Avoid that we remove the popup menu.
+                              " Return when there are no colors (looks like the cursor jumps).
+   27              0.000106   if pumvisible() || (&t_Co < 8 && !has("gui_running"))
+                                return
+   27              0.000010   endif
+                            
+                              " Get the character under the cursor and check if it's in 'matchpairs'.
+   27              0.000073   let c_lnum = line('.')
+   27              0.000060   let c_col = col('.')
+   27              0.000026   let before = 0
+                            
+   27              0.000065   let text = getline(c_lnum)
+   27              0.000133   let c_before = text->strpart(0, c_col - 1)->slice(-1)
+   27              0.000085   let c = text->strpart(c_col - 1)->slice(0, 1)
+   27              0.000343   let plist = split(&matchpairs, '.\zs[:,]')
+   27              0.000076   let i = index(plist, c)
+   27              0.000027   if i < 0
+                                " not found, in Insert mode try character before the cursor
+   27              0.000132     if c_col > 1 && (mode() == 'i' || mode() == 'R')
+   15              0.000030       let before = strlen(c_before)
+   15              0.000015       let c = c_before
+   15              0.000027       let i = index(plist, c)
+   27              0.000013     endif
+   27              0.000019     if i < 0
+                                  " not found, nothing to do
+   27              0.000021       return
+                                endif
+                              endif
+                            
+                              " Figure out the arguments for searchpairpos().
+                              if i % 2 == 0
+                                let s_flags = 'nW'
+                                let c2 = plist[i + 1]
+                              else
+                                let s_flags = 'nbW'
+                                let c2 = c
+                                let c = plist[i - 1]
+                              endif
+                              if c == '['
+                                let c = '\['
+                                let c2 = '\]'
+                              endif
+                            
+                              " Find the match.  When it was just before the cursor move it there for a
+                              " moment.
+                              if before > 0
+                                let has_getcurpos = exists("*getcurpos")
+                                if has_getcurpos
+                                  " getcurpos() is more efficient but doesn't exist before 7.4.313.
+                                  let save_cursor = getcurpos()
+                                else
+                                  let save_cursor = winsaveview()
+                                endif
+                                call cursor(c_lnum, c_col - before)
+                              endif
+                            
+                              if !has("syntax") || !exists("g:syntax_on")
+                                let s_skip = "0"
+                              else
+                                " Build an expression that detects whether the current cursor position is
+                                " in certain syntax types (string, comment, etc.), for use as
+                                " searchpairpos()'s skip argument.
+                                " We match "escape" for special items, such as lispEscapeSpecial, and
+                                " match "symbol" for lispBarSymbol.
+                                let s_skip = 'synstack(".", col("."))' . '->indexof({_, id -> synIDattr(id, "name") =~? ' . '"string\\|character\\|singlequote\\|escape\\|symbol\\|comment"}) >= 0'
+                                " If executing the expression determines that the cursor is currently in
+                                " one of the syntax types, then we want searchpairpos() to find the pair
+                                " within those syntax types (i.e., not skip).  Otherwise, the cursor is
+                                " outside of the syntax types and s_skip should keep its value so we skip
+                                " any matching pair inside the syntax types.
+                                " Catch if this throws E363: pattern uses more memory than 'maxmempattern'.
+                                try
+                                  execute 'if ' . s_skip . ' | let s_skip = "0" | endif'
+                                catch /^Vim\%((\a\+)\)\=:E363/
+                                  " We won't find anything, so skip searching, should keep Vim responsive.
+                                  return
+                                endtry
+                              endif
+                            
+                              " Limit the search to lines visible in the window.
+                              let stoplinebottom = line('w$')
+                              let stoplinetop = line('w0')
+                              if i % 2 == 0
+                                let stopline = stoplinebottom
+                              else
+                                let stopline = stoplinetop
+                              endif
+                            
+                              " Limit the search time to 300 msec to avoid a hang on very long lines.
+                              " This fails when a timeout is not supported.
+                              if mode() == 'i' || mode() == 'R'
+                                let timeout = exists("b:matchparen_insert_timeout") ? b:matchparen_insert_timeout : g:matchparen_insert_timeout
+                              else
+                                let timeout = exists("b:matchparen_timeout") ? b:matchparen_timeout : g:matchparen_timeout
+                              endif
+                              try
+                                let [m_lnum, m_col] = searchpairpos(c, '', c2, s_flags, s_skip, stopline, timeout)
+                              catch /E118/
+                                " Can't use the timeout, restrict the stopline a bit more to avoid taking
+                                " a long time on closed folds and long lines.
+                                " The "viewable" variables give a range in which we can scroll while
+                                " keeping the cursor at the same position.
+                                " adjustedScrolloff accounts for very large numbers of scrolloff.
+                                let adjustedScrolloff = min([&scrolloff, (line('w$') - line('w0')) / 2])
+                                let bottom_viewable = min([line('$'), c_lnum + &lines - adjustedScrolloff - 2])
+                                let top_viewable = max([1, c_lnum-&lines+adjustedScrolloff + 2])
+                                " one of these stoplines will be adjusted below, but the current values are
+                                " minimal boundaries within the current window
+                                if i % 2 == 0
+                                  if has("byte_offset") && has("syntax_items") && &smc > 0
+                            	let stopbyte = min([line2byte("$"), line2byte(".") + col(".") + &smc * 2])
+                            	let stopline = min([bottom_viewable, byte2line(stopbyte)])
+                                  else
+                            	let stopline = min([bottom_viewable, c_lnum + 100])
+                                  endif
+                                  let stoplinebottom = stopline
+                                else
+                                  if has("byte_offset") && has("syntax_items") && &smc > 0
+                            	let stopbyte = max([1, line2byte(".") + col(".") - &smc * 2])
+                            	let stopline = max([top_viewable, byte2line(stopbyte)])
+                                  else
+                            	let stopline = max([top_viewable, c_lnum - 100])
+                                  endif
+                                  let stoplinetop = stopline
+                                endif
+                                let [m_lnum, m_col] = searchpairpos(c, '', c2, s_flags, s_skip, stopline)
+                              endtry
+                            
+                              if before > 0
+                                if has_getcurpos
+                                  call setpos('.', save_cursor)
+                                else
+                                  call winrestview(save_cursor)
+                                endif
+                              endif
+                            
+                              " If a match is found setup match highlighting.
+                              if m_lnum > 0 && m_lnum >= stoplinetop && m_lnum <= stoplinebottom 
+                                if s:has_matchaddpos
+                                  call add(w:matchparen_ids, matchaddpos('MatchParen', [[c_lnum, c_col - before], [m_lnum, m_col]], 10))
+                                else
+                                  exe '3match MatchParen /\(\%' . c_lnum . 'l\%' . (c_col - before) . 'c\)\|\(\%' . m_lnum . 'l\%' . m_col . 'c\)/'
+                                  call add(w:matchparen_ids, 3)
+                                endif
+                                let w:paren_hl_on = 1
+                              endif
+
+FUNCTION  <SNR>2_LoadIndent()
+    Defined: /usr/share/nvim/runtime/indent.vim:14
+Called 2 times
+Total time:   0.000640
+ Self time:   0.000640
+
+count  total (s)   self (s)
+    2              0.000006     if exists("b:undo_indent")
+                                  exe b:undo_indent
+                                  unlet! b:undo_indent b:did_indent
+    2              0.000001     endif
+    2              0.000005     let s = expand("<amatch>")
+    2              0.000002     if s != ""
+    2              0.000003       if exists("b:did_indent")
+                            	unlet b:did_indent
+    2              0.000001       endif
+                            
+                                  " When there is a dot it is used to separate filetype names.  Thus for
+                                  " "aaa.bbb" load "indent/aaa.vim" and then "indent/bbb.vim".
+    4              0.000010       for name in split(s, '\.')
+                                    " XXX: "[.]" in the pattern makes it a wildcard on Windows
+    2              0.000587         exe $'runtime! indent/{name}[.]{{vim,lua}}'
+    4              0.000009       endfor
+    2              0.000001     endif
+
+FUNCTION  <SNR>19_Remove_Matches()
+    Defined: /usr/share/nvim/runtime/plugin/matchparen.vim:202
+Called 27 times
+Total time:   0.000331
+ Self time:   0.000331
+
+count  total (s)   self (s)
+   27              0.000082   if exists('w:paren_hl_on') && w:paren_hl_on
+                                while !empty(w:matchparen_ids)
+                                  silent! call remove(w:matchparen_ids, 0)->matchdelete()
+                                endwhile
+                                let w:paren_hl_on = 0
+   27              0.000014   endif
+
+FUNCTION  <SNR>32_SynSet()
+    Defined: /usr/share/nvim/runtime/syntax/synload.vim:27
+Called 2 times
+Total time:   0.001555
+ Self time:   0.001555
+
+count  total (s)   self (s)
+                              " clear syntax for :set syntax=OFF  and any syntax name that doesn't exist
+    2              0.000006   syn clear
+    2              0.000004   if exists("b:current_syntax")
+                                unlet b:current_syntax
+    2              0.000001   endif
+                            
+    2              0.000005   0verbose let s = expand("<amatch>")
+    2              0.000002   if s == "ON"
+                                " :set syntax=ON
+                                if &filetype == ""
+                                  echohl ErrorMsg
+                                  echo "filetype unknown"
+                                  echohl None
+                                endif
+                                let s = &filetype
+    2              0.000002   elseif s == "OFF"
+                                let s = ""
+    2              0.000001   endif
+                            
+    2              0.000002   if s != ""
+                                " Load the syntax file(s).  When there are several, separated by dots,
+                                " load each in sequence.  Skip empty entries.
+    4              0.000011     for name in split(s, '\.')
+    2              0.000004       if !empty(name)
+                                    " XXX: "[.]" in the first pattern makes it a wildcard on Windows
+    2              0.001483         exe $'runtime! syntax/{name}[.]{{vim,lua}} syntax/{name}/*.{{vim,lua}}'
+    2              0.000002       endif
+    4              0.000003     endfor
+    2              0.000001   endif
+
+FUNCTION  nvim_treesitter#indent()
+    Defined: ~/.local/share/nvim/lazy/nvim-treesitter/autoload/nvim_treesitter.vim:25
+Called 1 time
+Total time:   0.001191
+ Self time:   0.001191
+
+count  total (s)   self (s)
+    1              0.001190 	return luaeval(printf('require"nvim-treesitter.indent".get_indent(%d)', v:lnum))
+
+FUNCTION  <SNR>1_LoadFTPlugin()
+    Defined: /usr/share/nvim/runtime/ftplugin.vim:15
+Called 2 times
+Total time:   0.002120
+ Self time:   0.002120
+
+count  total (s)   self (s)
+    2              0.000010     if exists("b:undo_ftplugin")
+                                  exe b:undo_ftplugin
+                                  unlet! b:undo_ftplugin b:did_ftplugin
+    2              0.000002     endif
+                            
+    2              0.000009     let s = expand("<amatch>")
+    2              0.000003     if s != ""
+    2              0.000009       if &cpo =~# "S" && exists("b:did_ftplugin")
+                            	" In compatible mode options are reset to the global values, need to
+                            	" set the local values also when a plugin was already used.
+                            	unlet b:did_ftplugin
+    2              0.000001       endif
+                            
+                                  " When there is a dot it is used to separate filetype names.  Thus for
+                                  " "aaa.bbb" load "aaa" and then "bbb".
+    4              0.000013       for name in split(s, '\.')
+                                    " Load Lua ftplugins after Vim ftplugins _per directory_
+                                    " TODO(clason): use nvim__get_runtime when supports globs and modeline
+                                    " XXX: "[.]" in the first pattern makes it a wildcard on Windows
+    2              0.002042         exe $'runtime! ftplugin/{name}[.]{{vim,lua}} ftplugin/{name}_*.{{vim,lua}} ftplugin/{name}/*.{{vim,lua}}'
+    4              0.000005       endfor
+    2              0.000001     endif
+
+FUNCTIONS SORTED ON TOTAL TIME
+count  total (s)   self (s)  function
+   27   0.002230   0.001899  <SNR>19_Highlight_Matching_Pair()
+    2   0.002120             <SNR>1_LoadFTPlugin()
+    2   0.001555             <SNR>32_SynSet()
+    1   0.001191             nvim_treesitter#indent()
+    2   0.000640             <SNR>2_LoadIndent()
+   27   0.000331             <SNR>19_Remove_Matches()
+
+FUNCTIONS SORTED ON SELF TIME
+count  total (s)   self (s)  function
+    2              0.002120  <SNR>1_LoadFTPlugin()
+   27   0.002230   0.001899  <SNR>19_Highlight_Matching_Pair()
+    2              0.001555  <SNR>32_SynSet()
+    1              0.001191  nvim_treesitter#indent()
+    2              0.000640  <SNR>2_LoadIndent()
+   27              0.000331  <SNR>19_Remove_Matches()
+
