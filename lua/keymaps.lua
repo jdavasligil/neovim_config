@@ -22,6 +22,8 @@ vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
@@ -43,7 +45,7 @@ vim.keymap.set(
 )
 
 -- Make current file executable
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make E[X]ecutable" })
+vim.keymap.set("n", "<leader>xc", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make E[X]e[C]utable" })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
