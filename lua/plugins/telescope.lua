@@ -71,7 +71,7 @@ return {
 			vim.keymap.set("n", "<leader>ph", builtin.help_tags, { desc = "[P]roject Search [H]elp" })
 			vim.keymap.set("n", "<leader>pk", builtin.keymaps, { desc = "[P]roject Search [K]eymaps" })
 			vim.keymap.set("n", "<leader>pf", builtin.find_files, { desc = "[P]roject Search [F]iles" })
-			vim.keymap.set("n", "<leader>ps", builtin.builtin, { desc = "[P]roject Search [S]elect Telescope" })
+			-- vim.keymap.set("n", "<leader>ps", builtin.builtin, { desc = "[P]roject Search [S]elect Telescope" })
 			vim.keymap.set("n", "<leader>pw", builtin.grep_string, { desc = "[P]roject Search current [W]ord" })
 			vim.keymap.set("n", "<leader>pg", builtin.git_files, { desc = "[P]roject Search [G]it Files" })
 			vim.keymap.set("n", "<leader>pd", builtin.diagnostics, { desc = "[P]roject Search [D]iagnostics" })
@@ -82,7 +82,7 @@ return {
 				{ desc = '[P]roject Search Recent Files ("." for repeat)' }
 			)
 			vim.keymap.set("n", "<leader>pb", builtin.buffers, { desc = "[P]roject Search [B]uffers" })
-			vim.keymap.set("n", "<leader>pl", builtin.live_grep, { desc = "[P]roject Search by [L]ive Grep" })
+			vim.keymap.set("n", "<leader>ps", builtin.live_grep, { desc = "[P]roject [S]earch by Live Grep" })
 
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>/", function()
