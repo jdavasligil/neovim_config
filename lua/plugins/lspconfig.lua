@@ -135,6 +135,23 @@ return {
 			--   end
 			--   vim.diagnostic.config { signs = { text = diagnostic_signs } }
 			-- end
+			vim.diagnostic.config({
+				underline = false,
+				virtual_text = {
+					spacing = 2,
+					prefix = "●",
+				},
+				update_in_insert = false,
+				severity_sort = true,
+				signs = {
+					text = {
+						[vim.diagnostic.severity.ERROR] = "",
+						[vim.diagnostic.severity.WARN] = "",
+						[vim.diagnostic.severity.HINT] = "",
+						[vim.diagnostic.severity.INFO] = "",
+					},
+				},
+			})
 
 			-- LSP servers and clients are able to communicate to each other what features they support.
 			--  By default, Neovim doesn't support everything that is in the LSP specification.
